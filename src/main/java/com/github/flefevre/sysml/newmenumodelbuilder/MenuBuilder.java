@@ -6,9 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -17,6 +20,9 @@ import org.jdom.output.XMLOutputter;
  * @author Francois Le Fevre
  */
 public class MenuBuilder {
+	
+	public final static String PREFIX = new String ("org.eclipse.papyrus.sysml14.menu.uml4sysml14.");
+	
 	public static void main(String[] args) {
 		
 		//Stretgy extract from the initial UML creationmenumodel the node that are shared with UML 4 SysML
@@ -62,6 +68,8 @@ public class MenuBuilder {
 
 			for (Element node : list) {
 				if(lines.contains(node.getAttributeValue("label"))) {
+					node.setAttribute("id",PREFIX+node.getAttributeValue("label") ,Namespace.getNamespace("xmi", "http://www.omg.org/XMI"));
+					node.removeAttribute("displayAllRoles");
 					nodes.add(node);
 				}
 			}
@@ -81,6 +89,8 @@ public class MenuBuilder {
 
 			for (Element node : list) {
 				if(lines.contains(node.getAttributeValue("label"))) {
+					node.setAttribute("id",PREFIX+node.getAttributeValue("label") ,Namespace.getNamespace("xmi", "http://www.omg.org/XMI"));
+					node.removeAttribute("displayAllRoles");
 					nodes.add(node);
 				}
 			}
@@ -92,17 +102,13 @@ public class MenuBuilder {
 		}
 
 		//Order the node before exporting them to the console
-		nodes.stream().sorted((object1, object2) -> object1.getAttributeValue("label").compareTo(object2.getAttributeValue("label")));
-		try {
-			for(Element n : nodes) {
-
-				new XMLOutputter(Format.getPrettyFormat()).output(n, System.out);
-
-				System.out.println("");
-			}
+		Stream<Element> streamNodes = nodes.stream().sorted((object1, object2) -> object1.getAttributeValue("label").compareTo(object2.getAttributeValue("label")));
+		streamNodes.forEach(s -> {try {
+			new XMLOutputter(Format.getPrettyFormat()).output(s, System.out);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}System.out.println("");});
+
 	}
 }
